@@ -1,17 +1,21 @@
-using MetricsManager.Controllers;
-using Microsoft.AspNetCore.Mvc;
 using System;
 using Xunit;
+using Microsoft.AspNetCore.Mvc;
+using Moq;
+using NLog;
+using Microsoft.Extensions.Logging;
+using MetricsManager.Controllers;
 
 namespace MetricsManagerTests
 {
     public class CpuMetricsControllerUnitTests
     {
         private CpuMetricsController controller;
+        private Mock <ILogger<CpuMetricsController>> mock;
 
         public CpuMetricsControllerUnitTests()
         {
-            controller = new CpuMetricsController();
+            controller = new CpuMetricsController(mock.Object);
         }
 
         [Fact]

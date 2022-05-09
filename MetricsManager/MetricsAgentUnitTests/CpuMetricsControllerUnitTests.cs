@@ -2,26 +2,34 @@ using System;
 using Xunit;
 using MetricsAgent.Controllers;
 using Microsoft.AspNetCore.Mvc;
+using Moq;
+using MetricsAgent.DAL;
+using NLog;
+using Microsoft.Extensions.Logging;
 
 namespace MetricsAgentUnitTests
 {
     public class CpuMetricsControllerUnitTests
     {
-        private CpuMetricsController _controller;
+        private CpuMetricsController controller;
+        private Mock<ICpuMetricRepository> mock;
+        private Mock<ILogger<CpuMetricsController>> mockLogger;
         public CpuMetricsControllerUnitTests()
         {
-            _controller = new CpuMetricsController();
+            mock = new Mock<ICpuMetricRepository>();
+            mockLogger = new Mock<ILogger<CpuMetricsController>>();
+
+            controller = new CpuMetricsController(mock.Object, mockLogger.Object);
         }
 
         [Fact]
         public void GetMetrics_ReturnsOk()
         {
-            var fromTime = TimeSpan.FromSeconds(1);
-            var toTime = TimeSpan.FromSeconds(1);
+            mock.Setup(repository => repository.Create(It.IsAny<CpuMetric>())).Verifiable();
 
-            var result = _controller.GetCpuMetrics(fromTime, toTime);
+            var result = controller.Create(new MetricsAgent.Requests.CpuMetricCreateRequest { Time = TimeSpan.FromSeconds(1), Value = 50 });
 
-            _ = Assert.IsAssignableFrom<IActionResult>(result);
+            mock.Verify(repository => repository.Create(It.IsAny<CpuMetric>()), Times.AtMostOnce());
         }
     }
 }
